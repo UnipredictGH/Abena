@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Incoming Call...</title>
+    <style>
+        /* CSS STYLING */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Call Screen Layout */
+        #call-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            padding: 80px 20px 100px 20px;
+            background: linear-gradient(to bottom, #2c3e50, #000000);
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .caller-info {
+            text-align: center;
+        }
+
+        .caller-info p {
+            font-size: 18px;
+            letter-spacing: 1px;
+            color: #bdc3c7;
+            margin-bottom: 10px;
+        }
+
+        .caller-info h1 {
+            font-size: 32px;
+            font-weight: 400;
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+        }
+
+        .decline {
+            background-color: #ff3b30;
+        }
+
+        .accept {
+            background-color: #4cd964;
+            /* Simple pulsing animation for the accept button */
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(76, 217, 100, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0); }
+        }
+
+        .btn svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+
+        span {
+            font-size: 14px;
+            color: white;
+        }
+
+        /* Video Container */
+        #video-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Makes the video fill the screen like a FaceTime call */
+        }
+
+        /* Tap to start overlay (needed for mobile audio browsers) */
+        #interaction-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- This overlay ensures audio can play on iPhones/Androids -->
+    <div id="interaction-overlay" onclick="startRingtone()">
+        <h2>Tap to receive your surprise 🎁</h2>
+    </div>
+
+    <!-- Ringtone Audio -->
+    <audio id="ringtone" loop>
+        <source src="ringtone.m4a" type="audio/mp4">
+    </audio>
+
+    <!-- Incoming Call Screen -->
+    <div id="call-screen">
+        <div class="caller-info">
+            <p>iPhone</p>
+            <h1>Birthday Queen 🎂</h1>
+        </div>
+        
+        <div class="controls">
+            <div class="button-container">
+                <button class="btn decline">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="rotate(135 12 12)"/></svg>
+                </button>
+                <span>Decline</span>
+            </div>
+            
+            <div class="button-container">
+                <button class="btn accept" onclick="acceptCall()">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </button>
+                <span>Accept</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Playback Screen -->
+    <div id="video-container">
+        <video id="birthday-video" playsinline>
+            <source src="video.MOV" type="video/quicktime">
+            <source src="video.MOV" type="video/mp4">
+        </video>
+    </div>
+
+    <script>
+        const ringtone = document.getElementById('ringtone');
+        const overlay = document.getElementById('interaction-overlay');
+        const callScreen = document.getElementById('call-screen');
+        const videoContainer = document.getElementById('video-container');
+        const video = document.getElementById('birthday-video');
+
+        // Function to start audio after first interaction
+        function startRingtone() {
+            overlay.style.display = 'none';
+            ringtone.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        // Function to handle the "Accept" button
+        function acceptCall() {
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            
+            callScreen.style.display = 'none';
+            videoContainer.style.display = 'block';
+            
+            // Play video and enter fullscreen if possible
+            video.play().catch(error => {
+                video.controls = true; // Show controls if autoplay fails
+            });
+
+            // When video ends, you can optionally redirect her or show a message
+            video.onended = function() {
+                alert("Happy Birthday! ❤️");
+            };
+        }
+    </script>
+</body>
+</html>
